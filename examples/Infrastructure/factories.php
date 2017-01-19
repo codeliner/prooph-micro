@@ -1,28 +1,36 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
+use Prooph\Common\Messaging\Message;
+use Prooph\ServiceBus\Async\MessageProducer;
 use ProophExample\Micro\Infrastructure\InMemoryEmailGuard;
+use React\Promise\Deferred;
 
-$factories = [
-    'eventStore' => function() {
-        return new \Prooph\EventStore\InMemoryEventStore();
-    },
-    'emailGuard' => new class() {
+return [
+    'eventStore' => function (): \Prooph\EventStore\EventStore {
+        static $eventStore = null;
 
-        private static $emailGuard;
-
-        public function __invoke()
-        {
-            if(null === self::$emailGuard) {
-                self::$emailGuard = new InMemoryEmailGuard();
-            }
-
-            return self::$emailGuard;
+        if (null === $eventStore) {
+            $eventStore = new \Prooph\EventStore\InMemoryEventStore();
         }
-    }
+
+        return $eventStore;
+    },
+    'producer' => function () {
+        return new class() implements MessageProducer {
+            public function __invoke(Message $message, Deferred $deferred = null): void
+            {
+            }
+        };
+    },
+    'emailGuard' => function (): \ProophExample\Micro\Model\UniqueEmailGuard {
+        static $emailGuard = null;
+
+        if (null === $emailGuard) {
+            $emailGuard = new InMemoryEmailGuard();
+        }
+
+        return $emailGuard;
+    },
 ];
-
-return $factories;
-
-

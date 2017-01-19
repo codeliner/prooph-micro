@@ -1,20 +1,24 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Prooph\Micro;
 
 use Prooph\Common\Messaging\Message;
 
+// @todo: add interface, and success / error result?
 final class AggregateResult
 {
     private $raisedEvents;
 
     private $state;
 
-    public function __construct(array $raisedEvens, array $state)
+    public function __construct(array $raisedEvents, array $state)
     {
-        foreach ($raisedEvens as $event) self::assertEvent($event);
-        $this->raisedEvents = $raisedEvens;
+        foreach ($raisedEvents as $event) {
+            self::assertEvent($event);
+        }
+        $this->raisedEvents = $raisedEvents;
         $this->state = $state;
     }
 
@@ -33,7 +37,7 @@ final class AggregateResult
 
     private static function assertEvent(Message $event)
     {
-        if (!$event->messageType() === Message::TYPE_EVENT) {
+        if (! $event->messageType() === Message::TYPE_EVENT) {
             throw new \InvalidArgumentException('Message has to be of type event. Got ' . $event->messageType());
         }
     }
